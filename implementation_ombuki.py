@@ -154,7 +154,18 @@ def getChromosomeFitness(chromosome,verbose=False):
     return obj1,obj2
 
 #based on tools.selTournament
-def selCustom(individuals, k,fit_attr="fitness"):
+def selCustom(individuals, k):
+
+    #using DEAP's sortNondominated, we get a list of fronts,
+    #where each front 'i' dominates front 'i+1'.
+    #we use this to create a new attribute for each individual, called "rank"
+    #the rank is then used as the fitness value for the tournament selection,
+    #as specified by Ombuki et. al
+    pareto_fronts = tools.sortNondominated(individuals, k)
+    for front_rank in range(1,len(pareto_fronts)+1):
+        front=pareto_fronts[front_rank-1]
+        for ind in front:
+            setattr(ind, 'rank', front_rank)
 
     #as specified by the paper
     tournsize=4
@@ -164,7 +175,7 @@ def selCustom(individuals, k,fit_attr="fitness"):
     for i in range(k):
         aspirants = tools.selRandom(individuals, tournsize)
         if random.random() < r_thresh :
-            chosen_individual=max(aspirants, key=attrgetter(fit_attr))
+            chosen_individual=min(aspirants, key=attrgetter("rank"))
         else:
             chosen_individual = tools.selRandom(aspirants, 1)[0]
         chosen.append(chosen_individual)
