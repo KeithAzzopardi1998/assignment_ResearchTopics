@@ -2,9 +2,7 @@
 #by Ombuki et. al . It uses Solomon's test instances
 
 #TODO list:
-# -> Elite retension (currently, the best solutions are still participating in tournament selection)
 # -> mutation - inversion should only happen in a single route (at the moment, we're working with the entire chromosome)
-# -> crossover - requests should be re-inserted in the best position (we are currentyl inserting in the first feasible position)
 # -> routing scheme - Phase 2 from section 3.7 of the paper is yet to be implemented
 
 from __future__ import division
@@ -211,6 +209,9 @@ def isFeasible(route):
     global request_data
     global capacity
 
+    #this is just a sanity check...the code shouldn't even be generating such routes
+    if ((route[0]!=0) or (route[-1]!=0)): return False
+
     current_time=start_time
     current_passengers=0
 
@@ -246,22 +247,40 @@ def isFeasible(route):
 
 def insertRequest(routes,request):
 
-    #to be set to true if at least one route with a feasible insertion point has been found
-    feasible_insertion=False
+    candidate_solutions = []
 
-    #try to find the first feasible insertion point
-    for route in routes:
-        possible_insertion_points=range(1,len(route))
+    #loop through the routes in the solution
+    for route_index in range(0,len(routes)):
+        current_route = routes[i]
+
+        #for this route, get all possible locations where the new request could be inserted
+        possible_insertion_points=range(1,len(current_route))
+        #loop through the possible modifications for this route
         for ins_index in possible_insertion_points:
-            candidate_route=deepcopy(route)
-            candidate_route.insert(ins_index,request)
-            if isFeasible(candidate_root):
-                route=deepcopy(candidate_route)
-                return routes
 
-    #if we get to here, no feasible insertion point was found, so we have to create a new route
-    additional_route=[0,request,0]
-    routes.append(additional_route)
+            #take a copy of the route, and insert the new request at "ins_index"
+            candidate_route=deepcopy(current_route)
+            candidate_route.insert(ins_index,request)
+            #check if the rew route would still be feasible
+            if isFeasible(candidate_root):
+                #create a copy of the entire list of routes
+                candidate_sol=deepcopy(routes)
+                #replace the old route with the new one (with the request inserted into it)
+                candidate_sol[route_index]=deepcopy(candidate_route)
+                #store the solution with the inserted request
+                candidate_solutions.append(candidate_sol)
+
+    #if we found at least one feasible solution, pick the best one
+    if len(candidate_solutions)>0:
+        #work out the distance travelled for each of the candidate solutions
+        candidate_distances = [ getTotalDistance(sol) for sol in candidate_solutions]
+        #pick the best candidate solution (i.e the one which minimizes the distance travelled)
+        routes=candidate_solutions[np.argmin(candidate_distances)]
+
+    #if we didn't, just create a new route with "request" in it and append it to the old solution
+    else:
+        routes.append([0,request,0])
+
     return routes
 
 def cxCustom(ind1,ind2):
@@ -329,7 +348,7 @@ def runGA():
     toolbox.register("select", selCustom)
     toolbox.register("evaluate", getChromosomeFitness)
 
-    pop = toolbox.population(n=500)
+    pop = toolbox.population(n=300)
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
