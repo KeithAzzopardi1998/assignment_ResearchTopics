@@ -166,18 +166,29 @@ def selCustom(individuals, k):
         for ind in front:
             setattr(ind, 'rank', front_rank)
 
+    #the first rank is the "elite" (Pareto-optimal) set of solutions
+    #to which we want to guarantee a spot in the next generation
+    #therefore, we extract them before the tournament selection takes place
+    elite = pareto_fronts.pop(0)
+    individuals_excluding_elite = [i for i in individuals if i not in elite]
+    #we update k, the number of individuals to be chosen by the tournament selection
+    k-=len(elite)
+
     #as specified by the paper
     tournsize=4
     r_thresh=0.8
 
     chosen = []
     for i in range(k):
-        aspirants = tools.selRandom(individuals, tournsize)
+        aspirants = tools.selRandom(individuals_excluding_elite, tournsize)
         if random.random() < r_thresh :
             chosen_individual=min(aspirants, key=attrgetter("rank"))
         else:
             chosen_individual = tools.selRandom(aspirants, 1)[0]
         chosen.append(chosen_individual)
+
+    #add in the elite solutions
+    chosen+=elite
     return chosen
 
 def removeRequest(routes,request):
@@ -331,8 +342,8 @@ def runGA():
     out_pop,out_stats = algorithms.eaSimple(pop,
                                     toolbox,
                                     cxpb=0.8,#crossover probability
-                                    mutpb=0.3,#mutation probability
-                                    ngen=700,#number of generations
+                                    mutpb=0.1,#mutation probability
+                                    ngen=350,#number of generations
                                     stats=stats,
                                     halloffame=hof)
     end = time.time()
