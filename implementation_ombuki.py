@@ -318,7 +318,7 @@ def runGA():
     toolbox.register("select", selCustom)
     toolbox.register("evaluate", getChromosomeFitness)
 
-    pop = toolbox.population(n=300)
+    pop = toolbox.population(n=500)
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -331,8 +331,8 @@ def runGA():
     out_pop,out_stats = algorithms.eaSimple(pop,
                                     toolbox,
                                     cxpb=0.8,#crossover probability
-                                    mutpb=0.1,#mutation probability
-                                    ngen=350,#number of generations
+                                    mutpb=0.3,#mutation probability
+                                    ngen=700,#number of generations
                                     stats=stats,
                                     halloffame=hof)
     end = time.time()
