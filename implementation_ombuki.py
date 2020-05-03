@@ -2,7 +2,6 @@
 #by Ombuki et. al . It uses Solomon's test instances
 
 #TODO list:
-# -> Pareto ranking (currently, a weighted sum of the two objectives is being used)
 # -> Elite retension (currently, the best solutions are still participating in tournament selection)
 # -> mutation - inversion should only happen in a single route (at the moment, we're working with the entire chromosome)
 # -> crossover - requests should be re-inserted in the best position (we are currentyl inserting in the first feasible position)
