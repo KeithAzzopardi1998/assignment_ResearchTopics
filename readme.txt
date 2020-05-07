@@ -8,7 +8,7 @@ Chromosome Representation
 -> a chromosome is a 1D array which only represents the order in which requests are visited (not the routes)
 -> chromosomes are converted to a set of routes on the network as follows:
   -> Phase 1: keep inserting requests into the same route until the time windows or vehicle capacity are violated. The request which causes this to happen should be the start of a new routes
-  -> Phase 2: the last customer of each route is removed and placed at the very start of the next route. If this is advantageous, keep it this way, else revert (not implemented yet)
+  -> Phase 2: the last customer of each route is removed and placed at the very start of the next route. If this is advantageous, keep it this way, else revert (not implemented yet... requires some code restructuring to implement)
 
 Fitness Evaluation
 1. convert chromosome to routes
