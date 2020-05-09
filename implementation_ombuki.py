@@ -251,7 +251,7 @@ def insertRequest(routes,request):
 
     #loop through the routes in the solution
     for route_index in range(0,len(routes)):
-        current_route = routes[i]
+        current_route = routes[route_index]
 
         #for this route, get all possible locations where the new request could be inserted
         possible_insertion_points=range(1,len(current_route))
@@ -262,7 +262,7 @@ def insertRequest(routes,request):
             candidate_route=deepcopy(current_route)
             candidate_route.insert(ins_index,request)
             #check if the rew route would still be feasible
-            if isFeasible(candidate_root):
+            if isFeasible(candidate_route):
                 #create a copy of the entire list of routes
                 candidate_sol=deepcopy(routes)
                 #replace the old route with the new one (with the request inserted into it)
@@ -283,16 +283,24 @@ def insertRequest(routes,request):
 
     return routes
 
+#given a list of routes, this function returns the route serving the lowest number of requests
+def getShortestRoute(routes):
+    lengths=np.array([len(r) for r in routes])
+    shortest_routes_indices=np.where(lengths == lengths.min())[0]
+    #in the case where we have more than one route of the shortest length, choose 1 at random
+    chosen_route_index=random.choice(shortest_routes_indices)
+    return routes[chosen_route_index]
+
 def cxCustom(ind1,ind2):
     ind1_routes = chromosome2routes_advanced(ind1)
     ind2_routes = chromosome2routes_advanced(ind2)
 
     #pick a random route from the other chromosome
-    remove_from_ind2 = random.sample(ind1_routes,1)
+    remove_from_ind2 = getShortestRoute(ind1_routes)
     #remove the leading and trailing 0 (ie travelling to/from depot)
     remove_from_ind2 = remove_from_ind2[1:-1]
     #repeat for the other chromosome
-    remove_from_ind1 = random.sample(ind2_routes,1)
+    remove_from_ind1 = getShortestRoute(ind2_routes)
     remove_from_ind1 = remove_from_ind1[1:-1]
 
     #remove the chosen requests from their original place
