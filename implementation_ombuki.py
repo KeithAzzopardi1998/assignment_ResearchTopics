@@ -325,6 +325,52 @@ def mutCustom(individual):
 
     return individual,
 
+#if "x" has at least 1 neighbor within "radius", this function returns
+# the id of that request.
+#if x does not have any neighbors, it reurns -1
+def getNearestNeighbor(x,remaining,radius):
+    global dist_mat
+
+    closest_pt=remaining[0]
+    min_dist=dist_mat[x][closest_pt]
+    for r in remaining[1:]:
+        r_dist=dist_mat[x][r]
+        if r_dist<=min_dist:
+            closest_pt=r
+            min_dist=r_dist
+
+    if (min_dist<=radius):
+        return closest_pt
+    else :
+        return -1
+
+def generateGreedyPop(n,radius=10):
+    global request_data
+
+    greedy_pop=[]
+    for i in range(0,n):
+        C=list(request_data.index[1:])
+        l=[]
+
+        #pick a random request, and move it to the chromosome
+        req=random.choice(C)
+        l.append(req)
+        C.remove(req)
+
+        #repeat until the list of requests
+        #to order is empty
+        while C:
+            req=getNearestNeighbor(req,C,radius)
+            #if no neighbors were found, pick another random starting point
+            if (req==-1):
+                req=random.choice(C)
+            l.append(req)
+            C.remove(req)
+
+        greedy_pop.append(creator.Individual(l))
+
+    return greedy_pop
+
 def runGA():
     creator.create("FitnessMin", base.Fitness, weights=(-1.0,-1.0))
 
@@ -348,12 +394,16 @@ def runGA():
     toolbox.register("select", selCustom)
     toolbox.register("evaluate", getChromosomeFitness)
 
-    pop = toolbox.population(n=300)
+    pop_size=1000
+    greedy_ratio=0.2
+    random_pop = toolbox.population(n=int(pop_size*(1-greedy_ratio)))
+    greedy_pop=generateGreedyPop(n=int(pop_size*greedy_ratio))
+    pop=random_pop+greedy_pop
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean,axis=0)
-    #stats.register("std", np.std,axis=0)
+    stats.register("std", np.std,axis=0)
     stats.register("min", np.min,axis=0)
     #stats.register("max", np.max,axis=0)
 
