@@ -27,7 +27,7 @@ import time
 import itertools
 import argparse
 
-random.seed(100)
+random.seed(169)
 global start_time
 global end_time
 global dist_mat
