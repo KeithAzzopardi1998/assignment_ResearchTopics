@@ -394,8 +394,8 @@ def runGA():
     toolbox.register("select", selCustom)
     toolbox.register("evaluate", getChromosomeFitness)
 
-    pop_size=1000
-    greedy_ratio=0.2
+    pop_size=300
+    greedy_ratio=0.1
     random_pop = toolbox.population(n=int(pop_size*(1-greedy_ratio)))
     greedy_pop=generateGreedyPop(n=int(pop_size*greedy_ratio))
     pop=random_pop+greedy_pop
