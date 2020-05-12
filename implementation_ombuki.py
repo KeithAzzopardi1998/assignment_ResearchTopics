@@ -474,9 +474,10 @@ def main(input_filename):
     best = runGA()
     best_route=chromosome2routes_basic(best)
     print("\n\nBest Solution:")
+    print(best_route)
     print("Num. Vehivles : ",len(best_route))
     print("Total Distance Travelled : ",getTotalDistance(best_route))
-    visualize(best_route)
+    #visualize(best_route)
 
 
 if __name__ == '__main__':
